@@ -25,21 +25,38 @@ function GameController() {
   const gameboard = Gameboard();
   const board = gameboard.getBoard();
 
+  const anyWinner = () => {
+    const checkAllRows = () => {
+      let firstToken;
+      for (let x = 0; x < board.length; x++) {
+        firstToken = board[x][0].getValue();
+        if (firstToken === "") continue;
+        for (let y = 0; y < board.length; y++) {
+          if (board[x][y].getValue() !== firstToken) break;
+          if (y === board.length - 1) return true;
+        }
+      }
+      return false;
+    };
+
+    return checkAllRows();
+  };
+
   const playRound = (row, col, playerToken) => {
     const cell = board[row][col];
     if (cell.getValue() !== "") return;
     cell.addToken(playerToken);
   };
 
-  return { playRound, board };
+  return { playRound, board, anyWinner };
 }
 
 const game = GameController();
-const cell1 = game.board[0][2];
-const cell2 = game.board[1][1];
-console.log(cell1.getValue()); // ""
-console.log(cell2.getValue()); // ""
 game.playRound(0, 2, "X");
 game.playRound(1, 1, "O");
-console.log(cell1.getValue()); // "X"
-console.log(cell2.getValue()); // "O"
+console.log(game.anyWinner()); // false
+game.playRound(0, 1, "X");
+game.playRound(1, 2, "O");
+console.log(game.anyWinner()); // false
+game.playRound(0, 0, "X");
+console.log(game.anyWinner()); // true
