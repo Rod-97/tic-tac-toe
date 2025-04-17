@@ -39,7 +39,20 @@ function GameController() {
       return false;
     };
 
-    return checkAllRows();
+    const checkAllColumns = () => {
+      let firstToken;
+      for (let y = 0; y < board.length; y++) {
+        firstToken = board[0][y].getValue();
+        if (firstToken === "") continue;
+        for (let x = 0; x < board.length; x++) {
+          if (board[x][y].getValue() !== firstToken) break;
+          if (x === board.length - 1) return true;
+        }
+      }
+      return false;
+    };
+
+    return checkAllRows() || checkAllColumns();
   };
 
   const playRound = (row, col, playerToken) => {
@@ -55,8 +68,9 @@ const game = GameController();
 game.playRound(0, 2, "X");
 game.playRound(1, 1, "O");
 console.log(game.anyWinner()); // false
-game.playRound(0, 1, "X");
-game.playRound(1, 2, "O");
+game.playRound(2, 2, "X");
+game.playRound(0, 1, "O");
 console.log(game.anyWinner()); // false
 game.playRound(0, 0, "X");
+game.playRound(2, 1, "O");
 console.log(game.anyWinner()); // true
