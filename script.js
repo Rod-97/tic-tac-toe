@@ -52,7 +52,39 @@ function GameController() {
       return false;
     };
 
-    return checkAllRows() || checkAllColumns();
+    const checkDiagonals = () => {
+      const checkFirstDiagonal = () => {
+        const firstToken = board[0][0].getValue();
+        if (firstToken === "") return false;
+
+        for (let i = 1; i < board.length; i++) {
+          if (board[i][i].getValue() !== firstToken) break;
+          if (i === board.length - 1) return true;
+        }
+
+        return false;
+      };
+
+      const checkSecondDiagonal = () => {
+        let x = 0;
+        let y = board.length - 1;
+        const firstToken = board[x][y].getValue();
+        if (firstToken === "") return false;
+
+        while (x < board.length && y >= 0) {
+          if (board[x][y].getValue() !== firstToken) break;
+          if (x === board.length - 1 && y === 0) return true;
+          x++;
+          y--;
+        }
+
+        return false;
+      };
+
+      return checkFirstDiagonal() || checkSecondDiagonal();
+    };
+
+    return checkAllRows() || checkAllColumns() || checkDiagonals();
   };
 
   const playRound = (row, col, playerToken) => {
@@ -65,12 +97,12 @@ function GameController() {
 }
 
 const game = GameController();
-game.playRound(0, 2, "X");
-game.playRound(1, 1, "O");
+game.playRound(1, 2, "X");
+game.playRound(0, 2, "O");
 console.log(game.anyWinner()); // false
 game.playRound(2, 2, "X");
-game.playRound(0, 1, "O");
+game.playRound(1, 1, "O");
 console.log(game.anyWinner()); // false
 game.playRound(0, 0, "X");
-game.playRound(2, 1, "O");
+game.playRound(2, 0, "O");
 console.log(game.anyWinner()); // true
