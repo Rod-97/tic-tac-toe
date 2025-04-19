@@ -83,6 +83,23 @@ function anyWinner(board) {
   return checkAllRows() || checkAllColumns() || checkDiagonals();
 }
 
+function displayBoard(boardArg) {
+  const board = document.createElement("div");
+  board.classList.add("board");
+
+  for (let row = 0; row < boardArg.length; row++) {
+    for (let col = 0; col < boardArg.length; col++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      if (row % 2 === 0) cell.textContent = "X";
+      else cell.textContent = "O";
+      board.appendChild(cell);
+    }
+  }
+
+  document.body.appendChild(board);
+}
+
 function GameController() {
   const gameboard = Gameboard();
   const board = gameboard.getBoard();
@@ -98,6 +115,7 @@ function GameController() {
 
 const game = GameController();
 const board = game.board;
+displayBoard(board);
 game.playRound(1, 2, "X");
 game.playRound(0, 2, "O");
 console.log(anyWinner(board)); // false
