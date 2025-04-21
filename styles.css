@@ -34,3 +34,8 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+
+.winner-div {
+  font-weight: bold;
+  font-size: 36px;
+}
