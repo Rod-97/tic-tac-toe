@@ -92,70 +92,117 @@ function isBoardFull(board) {
   return true;
 }
 
-function displayBoard(boardArg) {
-  const board = document.createElement("div");
-  board.classList.add("board");
-
-  for (let row = 0; row < boardArg.length; row++) {
-    for (let col = 0; col < boardArg.length; col++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.classList.add(`${row}-${col}`);
-      board.appendChild(cell);
-    }
-  }
-
-  document.body.appendChild(board);
-}
-
-function GameController() {
+function GameController(name1, name2) {
   const gameboard = Gameboard();
   const board = gameboard.getBoard();
-  const player1 = "X";
-  const player2 = "O";
+  const player1 = { name: name1, token: "X" };
+  const player2 = { name: name2, token: "O" };
   let currentPlayer = player1;
-  displayBoard(board);
 
-  const play = () => {
-    const playRound = (row, col) => {
-      const cell = board[row][col];
-      if (cell.getValue() !== "") return;
-      cell.addToken(currentPlayer);
-      const cellUI = document.getElementsByClassName(`${row}-${col}`)[0];
-      cellUI.textContent = currentPlayer;
+  const playRound = (row, col) => {
+    const cell = board[row][col];
+    if (cell.getValue() !== "") return;
+    cell.addToken(currentPlayer.token);
+    if (anyWinner(board)) {
+      console.log(currentPlayer.name + " won!");
+      return;
+    }
+    if (isBoardFull(board)) {
+      console.log("It's a tie!");
+      return;
+    }
+    if (currentPlayer.token === player1.token) currentPlayer = player2;
+    else currentPlayer = player1;
+  };
 
-      if (anyWinner(board) || isBoardFull(board)) {
-        const winnerDiv = document.createElement("div");
-        winnerDiv.classList.add("winner-div");
-        if (anyWinner(board)) {
-          winnerDiv.textContent = `Player ${currentPlayer} won!`;
-        }
-        if (!anyWinner(board) && isBoardFull(board)) {
-          winnerDiv.textContent = "It's a tie!";
-        }
-        document.body.appendChild(winnerDiv);
+  const getBoard = () => board;
+
+  const getCurrentPlayer = () => currentPlayer;
+
+  return { playRound, getBoard, getCurrentPlayer };
+}
+
+function DisplayController(board) {
+  const init = () => {
+    const main = document.createElement("main");
+    main.classList.add("main");
+    const boardUI = document.createElement("div");
+    boardUI.classList.add("board");
+
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board.length; col++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.classList.add(`${row}-${col}`);
+        boardUI.appendChild(cell);
+      }
+    }
+
+    main.appendChild(boardUI);
+    document.body.appendChild(main);
+  };
+
+  const getAllCells = () => {
+    const cells = document.querySelectorAll(".cell");
+    return cells;
+  };
+
+  const populateCell = (row, col, token) => {
+    const cell = document.getElementsByClassName(`${row}-${col}`)[0];
+    cell.textContent = token;
+  };
+
+  const displayWinner = (name) => {
+    const main = document.getElementsByClassName("main")[0];
+    const winnerDiv = document.createElement("div");
+    winnerDiv.classList.add("winner-div");
+    if (name) winnerDiv.textContent = `${name} won!`;
+    else winnerDiv.textContent = "It's a tie!";
+    main.appendChild(winnerDiv);
+  };
+
+  const reset = () => {
+    const main = document.getElementsByClassName("main")[0];
+    main.remove();
+    init();
+  };
+
+  return { init, getAllCells, populateCell, displayWinner, reset };
+}
+
+function play() {
+  const name1 = "Player 1";
+  const name2 = "Player 2";
+  const game = GameController(name1, name2);
+  const board = game.getBoard();
+  const UI = DisplayController(board);
+  UI.init();
+
+  const cells = UI.getAllCells();
+
+  cells.forEach((cell) => {
+    cell.addEventListener("click", () => {
+      if (cell.textContent !== "" || anyWinner(board) || isBoardFull(board)) {
+        return;
+      }
+      const cellPosition = cell.classList[1].split("-");
+      const row = cellPosition[0];
+      const col = cellPosition[1];
+      const currentPlayer = game.getCurrentPlayer();
+      game.playRound(row, col, currentPlayer.token);
+      UI.populateCell(row, col, currentPlayer.token);
+
+      if (anyWinner(board)) {
+        UI.displayWinner(currentPlayer.name);
         return;
       }
 
-      if (currentPlayer === player1) currentPlayer = player2;
-      else currentPlayer = player1;
-    };
-
-    const cells = document.querySelectorAll(".cell");
-
-    cells.forEach((cell) => {
-      cell.addEventListener("click", () => {
-        if (anyWinner(board) || cell.textContent !== "") return;
-        const cellPosition = cell.classList[1].split("-");
-        const row = cellPosition[0];
-        const col = cellPosition[1];
-        playRound(row, col);
-      });
+      if (isBoardFull(board)) {
+        UI.displayWinner();
+        return;
+      }
     });
-  };
-
-  return { play };
+  });
 }
 
-const game = GameController();
-game.play();
+play();
