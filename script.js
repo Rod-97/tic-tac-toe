@@ -192,53 +192,63 @@ function DisplayController(board) {
   return { init, addResetBtn, getElements, populateCell, displayWinner, reset };
 }
 
-function bindCellEvents(game, UI) {
-  const cells = UI.getElements("cell");
+function AppController() {
+  const getPlayerNames = () => {
+    const name1 = prompt("Player 1: ");
+    const name2 = prompt("Player 2: ");
+    return { name1, name2 };
+  };
 
-  cells.forEach((cell) => {
-    cell.addEventListener("click", () => {
-      if (cell.textContent !== "" || game.anyWinner() || game.isBoardFull()) {
-        return;
-      }
+  const bindCellEvents = (game, UI) => {
+    const cells = UI.getElements("cell");
 
-      const cellPosition = cell.classList[1].split("-");
-      const row = cellPosition[0];
-      const col = cellPosition[1];
-      const currentPlayer = game.getCurrentPlayer();
-      game.playRound(row, col, currentPlayer.token);
-      UI.populateCell(row, col, currentPlayer.token);
+    cells.forEach((cell) => {
+      cell.addEventListener("click", () => {
+        if (cell.textContent !== "" || game.anyWinner() || game.isBoardFull()) {
+          return;
+        }
 
-      if (game.anyWinner()) {
-        UI.displayWinner(currentPlayer.name);
-        return;
-      }
+        const cellPosition = cell.classList[1].split("-");
+        const row = cellPosition[0];
+        const col = cellPosition[1];
+        const currentPlayer = game.getCurrentPlayer();
+        game.playRound(row, col, currentPlayer.token);
+        UI.populateCell(row, col, currentPlayer.token);
 
-      if (game.isBoardFull()) {
-        UI.displayWinner();
-        return;
-      }
+        if (game.anyWinner()) {
+          UI.displayWinner(currentPlayer.name);
+          return;
+        }
+
+        if (game.isBoardFull()) {
+          UI.displayWinner();
+          return;
+        }
+      });
     });
-  });
-}
+  };
 
-function play() {
-  const name1 = "Player 1";
-  const name2 = "Player 2";
-  const game = GameController(name1, name2);
-  const board = game.getBoard();
-  const UI = DisplayController(board);
-  UI.addResetBtn();
-  UI.init();
+  const play = () => {
+    const { name1, name2 } = getPlayerNames();
+    const game = GameController(name1, name2);
+    const board = game.getBoard();
+    const UI = DisplayController(board);
+    UI.addResetBtn();
+    UI.init();
 
-  bindCellEvents(game, UI);
-
-  const resetBtn = UI.getElements("reset-btn")[0];
-
-  resetBtn.addEventListener("click", () => {
-    game.reset();
-    UI.reset();
     bindCellEvents(game, UI);
-  });
+
+    const resetBtn = UI.getElements("reset-btn")[0];
+
+    resetBtn.addEventListener("click", () => {
+      game.reset();
+      UI.reset();
+      bindCellEvents(game, UI);
+    });
+  };
+
+  return { play };
 }
 
+const { play } = AppController();
 play();
