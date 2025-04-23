@@ -80,8 +80,8 @@ function checkDiagonals(board) {
 }
 
 function GameController(name1, name2) {
-  const gameboard = Gameboard();
-  const board = gameboard.getBoard();
+  let gameboard = Gameboard();
+  let board = gameboard.getBoard();
   const player1 = { name: name1, token: "X" };
   const player2 = { name: name2, token: "O" };
   let currentPlayer = player1;
@@ -121,7 +121,20 @@ function GameController(name1, name2) {
 
   const getCurrentPlayer = () => currentPlayer;
 
-  return { playRound, getBoard, getCurrentPlayer, anyWinner, isBoardFull };
+  const reset = () => {
+    gameboard = Gameboard();
+    board = gameboard.getBoard();
+    currentPlayer = player1;
+  };
+
+  return {
+    playRound,
+    getBoard,
+    getCurrentPlayer,
+    anyWinner,
+    isBoardFull,
+    reset,
+  };
 }
 
 function DisplayController(board) {
@@ -144,9 +157,16 @@ function DisplayController(board) {
     document.body.appendChild(main);
   };
 
-  const getAllCells = () => {
-    const cells = document.querySelectorAll(".cell");
-    return cells;
+  const addResetBtn = () => {
+    const resetBtn = document.createElement("button");
+    resetBtn.classList.add("reset-btn");
+    resetBtn.textContent = "RESET";
+    document.body.appendChild(resetBtn);
+  };
+
+  const getElements = (className) => {
+    const elements = document.querySelectorAll(`.${className}`);
+    return elements;
   };
 
   const populateCell = (row, col, token) => {
@@ -169,18 +189,11 @@ function DisplayController(board) {
     init();
   };
 
-  return { init, getAllCells, populateCell, displayWinner, reset };
+  return { init, addResetBtn, getElements, populateCell, displayWinner, reset };
 }
 
-function play() {
-  const name1 = "Player 1";
-  const name2 = "Player 2";
-  const game = GameController(name1, name2);
-  const board = game.getBoard();
-  const UI = DisplayController(board);
-  UI.init();
-
-  const cells = UI.getAllCells();
+function bindCellEvents(game, UI) {
+  const cells = UI.getElements("cell");
 
   cells.forEach((cell) => {
     cell.addEventListener("click", () => {
@@ -205,6 +218,26 @@ function play() {
         return;
       }
     });
+  });
+}
+
+function play() {
+  const name1 = "Player 1";
+  const name2 = "Player 2";
+  const game = GameController(name1, name2);
+  const board = game.getBoard();
+  const UI = DisplayController(board);
+  UI.addResetBtn();
+  UI.init();
+
+  bindCellEvents(game, UI);
+
+  const resetBtn = UI.getElements("reset-btn")[0];
+
+  resetBtn.addEventListener("click", () => {
+    game.reset();
+    UI.reset();
+    bindCellEvents(game, UI);
   });
 }
 
