@@ -21,75 +21,62 @@ function Gameboard() {
   return { getBoard };
 }
 
-function anyWinner(board) {
-  const checkAllRows = () => {
-    let firstToken;
-    for (let x = 0; x < board.length; x++) {
-      firstToken = board[x][0].getValue();
-      if (firstToken === "") continue;
-      for (let y = 0; y < board.length; y++) {
-        if (board[x][y].getValue() !== firstToken) break;
-        if (y === board.length - 1) return true;
-      }
-    }
-    return false;
-  };
-
-  const checkAllColumns = () => {
-    let firstToken;
-    for (let y = 0; y < board.length; y++) {
-      firstToken = board[0][y].getValue();
-      if (firstToken === "") continue;
-      for (let x = 0; x < board.length; x++) {
-        if (board[x][y].getValue() !== firstToken) break;
-        if (x === board.length - 1) return true;
-      }
-    }
-    return false;
-  };
-
-  const checkDiagonals = () => {
-    const checkFirstDiagonal = () => {
-      const firstToken = board[0][0].getValue();
-      if (firstToken === "") return false;
-
-      for (let i = 1; i < board.length; i++) {
-        if (board[i][i].getValue() !== firstToken) break;
-        if (i === board.length - 1) return true;
-      }
-
-      return false;
-    };
-
-    const checkSecondDiagonal = () => {
-      let x = 0;
-      let y = board.length - 1;
-      const firstToken = board[x][y].getValue();
-      if (firstToken === "") return false;
-
-      while (x < board.length && y >= 0) {
-        if (board[x][y].getValue() !== firstToken) break;
-        if (x === board.length - 1 && y === 0) return true;
-        x++;
-        y--;
-      }
-
-      return false;
-    };
-
-    return checkFirstDiagonal() || checkSecondDiagonal();
-  };
-
-  return checkAllRows() || checkAllColumns() || checkDiagonals();
-}
-
-function isBoardFull(board) {
+function checkAllRows(board) {
+  let firstToken;
   for (let x = 0; x < board.length; x++) {
+    firstToken = board[x][0].getValue();
+    if (firstToken === "") continue;
     for (let y = 0; y < board.length; y++) {
-      if (board[x][y].getValue() === "") return false;
+      if (board[x][y].getValue() !== firstToken) break;
+      if (y === board.length - 1) return true;
     }
   }
-  return true;
+  return false;
+}
+
+function checkAllColumns(board) {
+  let firstToken;
+  for (let y = 0; y < board.length; y++) {
+    firstToken = board[0][y].getValue();
+    if (firstToken === "") continue;
+    for (let x = 0; x < board.length; x++) {
+      if (board[x][y].getValue() !== firstToken) break;
+      if (x === board.length - 1) return true;
+    }
+  }
+  return false;
+}
+
+function checkDiagonals(board) {
+  const checkFirstDiagonal = () => {
+    const firstToken = board[0][0].getValue();
+    if (firstToken === "") return false;
+
+    for (let i = 1; i < board.length; i++) {
+      if (board[i][i].getValue() !== firstToken) break;
+      if (i === board.length - 1) return true;
+    }
+
+    return false;
+  };
+
+  const checkSecondDiagonal = () => {
+    let x = 0;
+    let y = board.length - 1;
+    const firstToken = board[x][y].getValue();
+    if (firstToken === "") return false;
+
+    while (x < board.length && y >= 0) {
+      if (board[x][y].getValue() !== firstToken) break;
+      if (x === board.length - 1 && y === 0) return true;
+      x++;
+      y--;
+    }
+
+    return false;
+  };
+
+  return checkFirstDiagonal() || checkSecondDiagonal();
 }
 
 function GameController(name1, name2) {
@@ -98,6 +85,21 @@ function GameController(name1, name2) {
   const player1 = { name: name1, token: "X" };
   const player2 = { name: name2, token: "O" };
   let currentPlayer = player1;
+
+  const anyWinner = () => {
+    return (
+      checkAllRows(board) || checkAllColumns(board) || checkDiagonals(board)
+    );
+  };
+
+  const isBoardFull = () => {
+    for (let x = 0; x < board.length; x++) {
+      for (let y = 0; y < board.length; y++) {
+        if (board[x][y].getValue() === "") return false;
+      }
+    }
+    return true;
+  };
 
   const playRound = (row, col) => {
     const cell = board[row][col];
@@ -119,7 +121,7 @@ function GameController(name1, name2) {
 
   const getCurrentPlayer = () => currentPlayer;
 
-  return { playRound, getBoard, getCurrentPlayer };
+  return { playRound, getBoard, getCurrentPlayer, anyWinner, isBoardFull };
 }
 
 function DisplayController(board) {
@@ -182,9 +184,10 @@ function play() {
 
   cells.forEach((cell) => {
     cell.addEventListener("click", () => {
-      if (cell.textContent !== "" || anyWinner(board) || isBoardFull(board)) {
+      if (cell.textContent !== "" || game.anyWinner() || game.isBoardFull()) {
         return;
       }
+
       const cellPosition = cell.classList[1].split("-");
       const row = cellPosition[0];
       const col = cellPosition[1];
@@ -192,12 +195,12 @@ function play() {
       game.playRound(row, col, currentPlayer.token);
       UI.populateCell(row, col, currentPlayer.token);
 
-      if (anyWinner(board)) {
+      if (game.anyWinner()) {
         UI.displayWinner(currentPlayer.name);
         return;
       }
 
-      if (isBoardFull(board)) {
+      if (game.isBoardFull()) {
         UI.displayWinner();
         return;
       }
