@@ -38,4 +38,6 @@ body {
 .winner-div {
   font-weight: bold;
   font-size: 36px;
+  margin-top: 10px;
+  text-align: center;
 }
