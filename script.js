@@ -164,11 +164,6 @@ function DisplayController(board) {
     document.body.appendChild(resetBtn);
   };
 
-  const getElements = (className) => {
-    const elements = document.querySelectorAll(`.${className}`);
-    return elements;
-  };
-
   const populateCell = (row, col, token) => {
     const cell = document.getElementsByClassName(`${row}-${col}`)[0];
     cell.textContent = token;
@@ -189,18 +184,18 @@ function DisplayController(board) {
     init();
   };
 
-  return { init, addResetBtn, getElements, populateCell, displayWinner, reset };
+  return {
+    init,
+    addResetBtn,
+    populateCell,
+    displayWinner,
+    reset,
+  };
 }
 
-function AppController() {
-  const getPlayerNames = () => {
-    const name1 = prompt("Player 1: ");
-    const name2 = prompt("Player 2: ");
-    return { name1, name2 };
-  };
-
+(function AppController() {
   const bindCellEvents = (game, UI) => {
-    const cells = UI.getElements("cell");
+    const cells = document.querySelectorAll(".cell");
 
     cells.forEach((cell) => {
       cell.addEventListener("click", () => {
@@ -228,8 +223,7 @@ function AppController() {
     });
   };
 
-  const play = () => {
-    const { name1, name2 } = getPlayerNames();
+  const play = (name1, name2) => {
     const game = GameController(name1, name2);
     const board = game.getBoard();
     const UI = DisplayController(board);
@@ -238,7 +232,7 @@ function AppController() {
 
     bindCellEvents(game, UI);
 
-    const resetBtn = UI.getElements("reset-btn")[0];
+    const resetBtn = document.querySelectorAll(".reset-btn")[0];
 
     resetBtn.addEventListener("click", () => {
       game.reset();
@@ -247,8 +241,15 @@ function AppController() {
     });
   };
 
-  return { play };
-}
+  const startBtn = document.querySelectorAll(".start-btn")[0];
 
-const { play } = AppController();
-play();
+  startBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const names = document.querySelectorAll(".name-input");
+    const form = document.querySelectorAll(".form")[0];
+    form.remove();
+    const name1 = names[0].value || "Player 1";
+    const name2 = names[1].value || "Player 2";
+    play(name1, name2);
+  });
+})();

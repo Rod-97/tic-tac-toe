@@ -42,6 +42,7 @@ body {
   text-align: center;
 }
 
+.start-btn,
 .reset-btn {
   color: gold;
   background-color: blue;
@@ -55,4 +56,19 @@ body {
     color: blue;
     background-color: gold;
   }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form .name-input {
+  width: 200px;
+  font-size: 30px;
+}
+
+.form .start-btn {
+  margin-top: 20px;
 }
