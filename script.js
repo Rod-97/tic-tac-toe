@@ -137,7 +137,7 @@ function GameController(name1, name2) {
   };
 }
 
-function DisplayController(board) {
+function UIController(board) {
   const init = () => {
     const main = document.createElement("main");
     main.classList.add("main");
@@ -226,7 +226,7 @@ function DisplayController(board) {
   const play = (name1, name2) => {
     const game = GameController(name1, name2);
     const board = game.getBoard();
-    const UI = DisplayController(board);
+    const UI = UIController(board);
     UI.addResetBtn();
     UI.init();
 
